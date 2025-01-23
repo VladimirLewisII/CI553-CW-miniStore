@@ -15,8 +15,8 @@ class PosOnScrn
   private static final int maxX;  // Width of screen
   private static final int maxY;  // Height of screen
   
-  private static int cX = 0; // Initial window pos on screen
-  private static int cY = 0; // Initial window pos on screen
+  private static int cX = 150; // Initial window pos on screen
+  private static int cY = 320; // Initial window pos on screen
   
   // class initialiser
   //  Will be called (once) when the class is loaded
@@ -36,7 +36,7 @@ class PosOnScrn
      {
         if ( cY + 2 * clientH < maxY )
         {
-            cX = 0; cY += clientH;
+            cX = 150; cY += clientH;
         }
      } else {
          cX += clientW;

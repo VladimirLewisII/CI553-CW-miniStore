@@ -7,14 +7,14 @@ package clients.customer;
 public class CustomerController
 {
   private CustomerModel model = null;
-  private CustomerView  view  = null;
+  private clients.customer.CustomerView view  = null;
 
   /**
    * Constructor
    * @param model The model 
    * @param view  The view from which the interaction came
    */
-  public CustomerController( CustomerModel model, CustomerView view )
+  public CustomerController( CustomerModel model, clients.customer.CustomerView view )
   {
     this.view  = view;
     this.model = model;

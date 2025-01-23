@@ -14,7 +14,6 @@ public class CashierModel extends Observable
 {
   private enum State { process, checked }
 
-  private State       theState   = State.process;   // Current state
   private Product     theProduct = null;            // Current product
   private Basket      theBasket  = null;            // Bought items
 
@@ -38,7 +37,7 @@ public class CashierModel extends Observable
     {
       DEBUG.error("CashierModel.constructor\n%s", e.getMessage() );
     }
-    theState   = State.process;                  // Current state
+
   }
   
   /**
@@ -54,34 +53,45 @@ public class CashierModel extends Observable
    * Check if the product is in Stock
    * @param productNum The product number
    */
-  public void doCheck(String productNum )
+  public boolean doCheck(String productNum, String amount )
   {
     String theAction = "";
-    theState  = State.process;                  // State process
+    boolean posInt = false;
+    boolean goodCheck = false;
+
+
     pn  = productNum.trim();                    // Product no.
-    int    amount  = 1;                         //  & quantity
+    try {
+      if(Integer.parseInt(amount)>0){
+        posInt =true;
+      }else { posInt = false;}
+    }catch (Exception e){
+      posInt= false;
+    }
     try
     {
-      if ( theStock.exists( pn ) )              // Stock Exists?
-      {                                         // T
-        Product pr = theStock.getDetails(pn);   //  Get details
-        if ( pr.getQuantity() >= amount )       //  In stock?
-        {                                       //  T
-          theAction =                           //   Display 
-            String.format( "%s : %7.2f (%2d) ", //
-              pr.getDescription(),              //    description
-              pr.getPrice(),                    //    price
-              pr.getQuantity() );               //    quantity     
-          theProduct = pr;                      //   Remember prod.
-          theProduct.setQuantity( amount );     //    & quantity
-          theState = State.checked;             //   OK await BUY 
-        } else {                                //  F
-          theAction =                           //   Not in Stock
-            pr.getDescription() +" not in stock";
-        }
-      } else {                                  // F Stock exists
-        theAction =                             //  Unknown
-          "Unknown product number " + pn;       //  product no.
+      if(posInt){
+          if ( theStock.exists( pn ) )              // Stock Exists?
+          {                                         // T
+            Product pr = theStock.getDetails(pn);   //  Get details
+            if ( pr.getQuantity() >= Integer.parseInt(amount) )       //  In stock?
+            {                                       //  T
+              theAction =                           //   Display
+                String.format( "%s : %7.2f (%2d) ", //
+                  pr.getDescription(),              //    description
+                  pr.getPrice(),                    //    price
+                  pr.getQuantity() );               //    quantity
+              theProduct = pr;                      //   Remember prod.
+              theProduct.setQuantity( Integer.parseInt(amount) );     //    & quantity
+              posInt = true;
+            } else {                                //  F
+              theAction =                           //   Not in Stock
+                pr.getDescription() +" insufficient stock";
+            }
+          }
+          } else {                                  // F Stock exists
+            theAction =                             //  Unknown
+              "Unknown product number/quantity ";       //  product no.
       }
     } catch( StockException e )
     {
@@ -90,18 +100,19 @@ public class CashierModel extends Observable
       theAction = e.getMessage();
     }
     setChanged(); notifyObservers(theAction);
+    return posInt;
   }
 
   /**
    * Buy the product
    */
-  public void doBuy()
+  public void doBuy(String productNum, String amount )
   {
     String theAction = "";
-    int    amount  = 1;                         //  & quantity
+
     try
     {
-      if ( theState != State.checked )          // Not checked
+      if (!doCheck(productNum,amount))          // Not checked
       {                                         //  with customer
         theAction = "please check its availablity";
       } else {
@@ -125,7 +136,7 @@ public class CashierModel extends Observable
             "CashierModel.doBuy", e.getMessage() );
       theAction = e.getMessage();
     }
-    theState = State.process;                   // All Done
+
     setChanged(); notifyObservers(theAction);
   }
   
@@ -145,7 +156,7 @@ public class CashierModel extends Observable
         theBasket = null;                     //  reset
       }                                       //
       theAction = "Start New Order";            // New order
-      theState = State.process;               // All Done
+
        theBasket = null;
     } catch( OrderException e )
     {
